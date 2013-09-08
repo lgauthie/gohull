@@ -5,7 +5,7 @@ import (
 	"github.com/go-gl/gl"
 	"github.com/go-gl/glfw"
 	"os"
-	//"unsafe"
+	"unsafe"
     //"math"
     //"time"
 	//"errors"
@@ -16,6 +16,8 @@ const (
 	Title  = "The Start"
 	Width  = 800
 	Height = 600
+    Float32 float32 = 0.0
+    Int32 int32 = 0
 )
 
 const fShaderSrc =`
@@ -27,7 +29,7 @@ out vec4 outColor;
 
 void main()
 {
-    outColor = vec4( Color, 1.0 );
+    outColor = vec4( 1.0 - Color, 1.0 );
 }`
 
 const vShaderSrc = `
@@ -41,8 +43,33 @@ out vec3 Color;
 void main()
 {
     Color = color;
-    gl_Position = vec4( position, 0.0, 1.0 );
+    gl_Position = vec4( position.x, -position.y, 0.0, 1.0 );
 }`
+
+func setupShaders() {
+    vertexShader := gl.CreateShader(gl.VERTEX_SHADER)
+    vertexShader.Source(vShaderSrc)
+    vertexShader.Compile()
+
+    fragmentShader := gl.CreateShader(gl.FRAGMENT_SHADER)
+    fragmentShader.Source(fShaderSrc)
+    fragmentShader.Compile()
+
+    shaderProgram := gl.CreateProgram()
+    shaderProgram.AttachShader(vertexShader)
+    shaderProgram.AttachShader(fragmentShader)
+    shaderProgram.BindFragDataLocation(0, "outColor")
+    shaderProgram.Link()
+    shaderProgram.Use()
+
+    posAttrib := shaderProgram.GetAttribLocation("position")
+    posAttrib.EnableArray()
+    posAttrib.AttribPointer(2, gl.FLOAT, false, int(unsafe.Sizeof(Float32))*5, uintptr(0))
+
+    colAttrib := shaderProgram.GetAttribLocation("color")
+    colAttrib.EnableArray()
+    colAttrib.AttribPointer(3, gl.FLOAT, false, int(unsafe.Sizeof(Float32))*5, unsafe.Sizeof(Float32)*2)
+}
 
 func main() {
 	if err := glfw.Init(); err != nil {
@@ -80,40 +107,24 @@ func main() {
     // Create an array buffer of points that will be the
     // vertexes of a triangle.
     vertices := []float32{
-         0.0,  0.5, 1.0, 0.0, 0.0, // Vertex 1: Red
-         0.5, -0.5, 0.0, 1.0, 0.0, // Vertex 2: Green
-        -0.5, -0.5, 0.0, 0.0, 1.0, // Vertex 3: Blue
+        -0.5,  0.5, 1.0, 0.0, 0.0, // Top-let
+         0.5,  0.5, 0.0, 1.0, 0.0, // Top-right
+         0.5, -0.5, 0.0, 0.0, 1.0, // Bottom-right
+        -0.5, -0.5, 1.0, 1.0, 1.0, // Bottom-let
     }
     vbo := gl.GenBuffer()
     vbo.Bind(gl.ARRAY_BUFFER)
-    sizeofFloat := 4
-    gl.BufferData(gl.ARRAY_BUFFER, sizeofFloat*len(vertices), vertices, gl.STATIC_DRAW)
+    gl.BufferData(gl.ARRAY_BUFFER, int(unsafe.Sizeof(Float32))*len(vertices), vertices, gl.STATIC_DRAW)
 
-    // SETUP SHADERS
-    vertexShader := gl.CreateShader(gl.VERTEX_SHADER)
-    vertexShader.Source(vShaderSrc)
-    vertexShader.Compile()
+    elements := []int32 {
+        0, 1, 2,
+        3, 2, 0,
+    }
+    ebo := gl.GenBuffer()
+    ebo.Bind(gl.ELEMENT_ARRAY_BUFFER)
+    gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, int(unsafe.Sizeof(Int32))*len(elements), elements, gl.STATIC_DRAW)
 
-    fragmentShader := gl.CreateShader(gl.FRAGMENT_SHADER)
-    fragmentShader.Source(fShaderSrc)
-    fragmentShader.Compile()
-
-    shaderProgram := gl.CreateProgram()
-    shaderProgram.AttachShader(vertexShader)
-    shaderProgram.AttachShader(fragmentShader)
-    shaderProgram.BindFragDataLocation(0, "outColor")
-    shaderProgram.Link()
-    shaderProgram.Use()
-
-    posAttrib := shaderProgram.GetAttribLocation("position")
-    var offset uintptr = 0
-    posAttrib.EnableArray()
-    posAttrib.AttribPointer(2, gl.FLOAT, false, sizeofFloat*5, offset)
-
-    colAttrib := shaderProgram.GetAttribLocation("color")
-    offset = uintptr(sizeofFloat*2)
-    colAttrib.EnableArray()
-    colAttrib.AttribPointer(3, gl.FLOAT, false, sizeofFloat*5, offset)
+    setupShaders()
 
     e = gl.GetError()
     fmt.Println(e)
@@ -121,7 +132,8 @@ func main() {
 	for glfw.WindowParam(glfw.Opened) == 1 {
         gl.Clear(gl.COLOR_BUFFER_BIT)
         gl.ClearColor(0.0, 0.0, 0.0, 1.0)
-        gl.DrawArrays(gl.LINE_LOOP, 0, 3);
+        gl.DrawElements(gl.TRIANGLES, 3, gl.UNSIGNED_INT, uintptr(0));
+        //gl.DrawArrays(gl.TRIANGLES, 0, 6);
 		glfw.SwapBuffers()
 	}
 }
