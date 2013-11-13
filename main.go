@@ -1,15 +1,15 @@
 package main
 
 import (
-	"fmt"
-	"github.com/go-gl/glfw"
-	"os"
+    "fmt"
+    "github.com/go-gl/glfw"
+    "os"
 )
 
 const (
-	Title  = "Convex Hull"
-	Width  = 800
-	Height = 600
+    Title  = "Convex Hull"
+    Width  = 800
+    Height = 600
     Float32 float32 = 0.0
     Int32 int32 = 0
 )
@@ -25,12 +25,12 @@ func onMouseBtn(button, state int) {
 }
 
 func onKey(key, state int) {
-	switch key {
-	case glfw.KeySpace:
+    switch key {
+    case glfw.KeySpace:
         if state == 0 {
             spaceReleased = true
         }
-	}
+    }
 }
 
 func normalizeMouse(x, y int) (x_out, y_out float32) {
@@ -39,34 +39,34 @@ func normalizeMouse(x, y int) (x_out, y_out float32) {
 }
 
 func main() {
-	if err := glfw.Init(); err != nil {
-		fmt.Fprintf(os.Stderr, "glfw: %s\n", err)
-		return
-	}
-	defer glfw.Terminate()
+    if err := glfw.Init(); err != nil {
+        fmt.Fprintf(os.Stderr, "glfw: %s\n", err)
+        return
+    }
+    defer glfw.Terminate()
 
-	glfw.OpenWindowHint(glfw.WindowNoResize, 1)
-	glfw.OpenWindowHint(glfw.OpenGLVersionMajor, 3)
-	glfw.OpenWindowHint(glfw.OpenGLVersionMinor, 2)
+    glfw.OpenWindowHint(glfw.WindowNoResize, 1)
+    glfw.OpenWindowHint(glfw.OpenGLVersionMajor, 3)
+    glfw.OpenWindowHint(glfw.OpenGLVersionMinor, 2)
     glfw.OpenWindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile);
 
-	if err := glfw.OpenWindow(Width, Height, 0, 0, 0, 0, 16, 0, glfw.Windowed); err != nil {
-		fmt.Fprintf(os.Stderr, "glfw: %s\n", err)
-		return
-	}
-	defer glfw.CloseWindow()
+    if err := glfw.OpenWindow(Width, Height, 0, 0, 0, 0, 16, 0, glfw.Windowed); err != nil {
+        fmt.Fprintf(os.Stderr, "glfw: %s\n", err)
+        return
+    }
+    defer glfw.CloseWindow()
 
-	glfw.SetSwapInterval(1)
-	glfw.SetWindowTitle(Title)
+    glfw.SetSwapInterval(1)
+    glfw.SetWindowTitle(Title)
     glfw.SetMouseButtonCallback(onMouseBtn)
-	glfw.SetKeyCallback(onKey)
+    glfw.SetKeyCallback(onKey)
     setupShaders()
 
     pressed := false
     var x, y float32
     points := Points{}
     hull := Points{}
-	for glfw.WindowParam(glfw.Opened) == 1 {
+    for glfw.WindowParam(glfw.Opened) == 1 {
         // Add points if mouse is clicked
         if mouse[0] != 0 {
             x_, y_ := glfw.MousePos()
@@ -89,6 +89,6 @@ func main() {
         if len(hull) > 0 {
             drawHull(hull)
         }
-		glfw.SwapBuffers()
-	}
+        glfw.SwapBuffers()
+    }
 }

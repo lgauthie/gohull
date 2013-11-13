@@ -23,7 +23,7 @@ func (p Points) Less(i, j int) bool {
     return p[i].x < p[j].x
 }
 
-func fastConvexHull(points Points) (Points){
+func fastConvexHull(points Points) (Points) {
     if len(points) < 2 {
         return points
     }

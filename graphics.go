@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/go-gl/gl"
+    "github.com/go-gl/gl"
     "fmt"
     "os"
     "unsafe"
@@ -44,8 +44,8 @@ func setupShaders() {
     fmt.Println("GL Version", ver)
 
     if err := gl.Init(); err != 0 {
-		fmt.Fprintf(os.Stderr, "OpenGL err:", err)
-		return
+        fmt.Fprintf(os.Stderr, "OpenGL err:", err)
+        return
     }
     e := gl.GetError() // Don't care about this error.. glfw bug
 
